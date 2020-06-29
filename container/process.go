@@ -33,11 +33,13 @@ type ContainerInfo struct {
 // 关于 SysProcAttr 的 issue：
 // https://github.com/xianlubird/mydocker/issues/3
 
-func NewParentProcess(tty bool, command string) *exec.Cmd {
-	log.Println("NewParentProcess command:", command)
-	args := []string{"init", command}
-	log.Println("NewParentProcess args:", args)
-	cmd := exec.Command("/proc/self/exe", args...)
+func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+	readPipe, writePipe, err := NewPipe()
+	if err != nil {
+		log.Printf("New pipe error %+v", err)
+		return nil, nil
+	}
+	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		// 加入syscall.CLONE_NEWUSER，解决无法调用init进入初始化的问题
 		Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
@@ -61,7 +63,8 @@ func NewParentProcess(tty bool, command string) *exec.Cmd {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	return cmd
+	cmd.ExtraFiles = []*os.File{readPipe}
+	return cmd, writePipe
 }
 
 func NewPipe() (*os.File, *os.File, error) {
