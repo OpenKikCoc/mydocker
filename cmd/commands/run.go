@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/OpenKikCoc/mydocker/cgroups"
+	//"github.com/OpenKikCoc/mydocker/cgroups"
 	"github.com/OpenKikCoc/mydocker/cgroups/subsystems"
 	"github.com/OpenKikCoc/mydocker/container"
 )
@@ -19,6 +19,7 @@ var (
 	memory   string
 	cpushare string
 	cpuset   string
+	volume   string
 )
 
 func init() {
@@ -30,6 +31,7 @@ func runCmdFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&memory, "mem", "m", "", "memory limit")
 	cmd.PersistentFlags().StringVarP(&cpushare, "cpushare", "", "", "cpushare limit")
 	cmd.PersistentFlags().StringVarP(&memory, "cpuset", "", "", "cpuset limit")
+	cmd.PersistentFlags().StringVarP(&volume, "volume", "v", "", "cpuset limit")
 }
 
 var (
@@ -51,13 +53,13 @@ var (
 				CpuSet:      cpuset,
 				CpuShare:    cpushare,
 			}
-			Run(usetty, args, resConf)
+			Run(usetty, args, resConf, volume)
 		},
 	}
 )
 
-func Run(usetty bool, args []string, conf *subsystems.ResourceConfig) {
-	parent, writePipe := container.NewParentProcess(usetty)
+func Run(usetty bool, args []string, conf *subsystems.ResourceConfig, volume string) {
+	parent, writePipe := container.NewParentProcess(usetty, volume)
 	if parent == nil {
 		log.Println("New parent error")
 	}
@@ -67,13 +69,16 @@ func Run(usetty bool, args []string, conf *subsystems.ResourceConfig) {
 	}
 	log.Println("Run parent.Start() has finished")
 
-	cgroupManager := cgroups.NewCgroupManager("mydocker-cgroup")
-	defer cgroupManager.Destroy()
-	cgroupManager.Set(conf)
-	cgroupManager.Apply(parent.Process.Pid)
-
+	//cgroupManager := cgroups.NewCgroupManager("mydocker-cgroup")
+	//defer cgroupManager.Destroy()
+	//cgroupManager.Set(conf)
+	//cgroupManager.Apply(parent.Process.Pid)
 	sendInitCommand(args, writePipe)
 	parent.Wait()
+	mntURL := "/root/mnt/"
+	rootURL := "/root/"
+	container.DeleteWorkSpace(rootURL, mntURL, volume)
+	os.Exit(0)
 }
 
 func sendInitCommand(args []string, writePipe *os.File) {
