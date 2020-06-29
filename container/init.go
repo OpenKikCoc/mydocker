@@ -55,8 +55,8 @@ func setUpMount() {
 		return
 	}
 	log.Printf("Current location is %s\n", pwd)
-	//pivotRoot(pwd)
-	pivotRoot(pwd + "/busybox") // 根项目下的busybox
+	pivotRoot(pwd)
+	//pivotRoot(pwd + "/busybox") // 根项目下的busybox
 
 	//mount proc
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV

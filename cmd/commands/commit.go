@@ -7,6 +7,8 @@ import (
 	"os/exec"
 
 	"github.com/spf13/cobra"
+
+	"github.com/OpenKikCoc/mydocker/container"
 	//"github.com/OpenKikCoc/mydocker/cgroups"
 )
 
@@ -24,23 +26,24 @@ var (
 		Use:   "commit",
 		Short: "Commit Command",
 		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return errors.New("requires at least one arg")
+			if len(args) < 2 {
+				return errors.New("Missing container name and image name")
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("CommitCmd")
-			fmt.Println("imageName = ", args[0])
-			commitContainer(args[0])
+			commitContainer(args[0], args[1])
 		},
 	}
 )
 
-func commitContainer(imageName string) {
-	mntURL := "/root/mnt"
-	imageTar := "/root/" + imageName + ".tar"
-	fmt.Printf("%s", imageTar)
+func commitContainer(containerName, imageName string) {
+	mntURL := fmt.Sprintf(container.MntUrl, containerName)
+	mntURL += "/"
+
+	imageTar := container.RootUrl + "/" + imageName + ".tar"
+
 	if _, err := exec.Command("tar", "-czf", imageTar, "-C", mntURL, ".").CombinedOutput(); err != nil {
 		log.Printf("Tar folder %s error %v\n", mntURL, err)
 	}

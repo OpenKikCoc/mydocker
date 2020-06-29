@@ -22,7 +22,7 @@ var (
 		Use:   "init",
 		Short: "Init Command, Don't call it outside.",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("InitCmd: args =", args)
+			fmt.Println("InitCmd: args :", args)
 			err := container.RunContainerInitProcess()
 			// return err
 			panic(err)

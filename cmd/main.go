@@ -11,6 +11,13 @@ func main() {
 	rootCmd.AddCommand(
 		cmd.RunCmd,
 		cmd.InitCmd,
+		cmd.ListCmd,
+		cmd.LogCmd,
+		cmd.ExecCmd,
+		cmd.StopCmd,
+		cmd.RemoveCmd,
+		cmd.CommitCmd,
+		cmd.NetworkCmd,
 		// cmd.VersionCmd,
 	)
 	if rootCmd.Execute() != nil {
