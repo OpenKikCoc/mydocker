@@ -44,9 +44,11 @@ var (
 
 func Run(usetty bool, args []string) {
 	parent := container.NewParentProcess(usetty, args[0])
+	// parent.Run will wait
 	if err := parent.Start(); err != nil {
 		log.Println("Run parent.Start()", err)
 	}
+	log.Println("Run parent.Start() has finished")
 	parent.Wait()
 	os.Exit(-1)
 }

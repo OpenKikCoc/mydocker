@@ -34,11 +34,13 @@ type ContainerInfo struct {
 // https://github.com/xianlubird/mydocker/issues/3
 
 func NewParentProcess(tty bool, command string) *exec.Cmd {
-	log.Println("NewParentProcess: command", command)
+	log.Println("NewParentProcess command:", command)
 	args := []string{"init", command}
+	log.Println("NewParentProcess args:", args)
 	cmd := exec.Command("/proc/self/exe", args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
+		// 加入syscall.CLONE_NEWUSER，解决无法调用init进入初始化的问题
+		Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
 		UidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
