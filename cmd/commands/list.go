@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -28,12 +27,6 @@ var (
 	ListCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List Command",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return errors.New("requires at least one arg")
-			}
-			return nil
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("ListCommand")
 			listContainers()

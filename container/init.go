@@ -21,6 +21,7 @@ func RunContainerInitProcess() error {
 	//defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	//syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 	setUpMount()
+	log.Printf("after setUpMount: env = %v\n")
 
 	path, err := exec.LookPath(args[0])
 	if err != nil {
@@ -57,12 +58,20 @@ func setUpMount() {
 	log.Printf("Current location is %s\n", pwd)
 	pivotRoot(pwd)
 	//pivotRoot(pwd + "/busybox") // 根项目下的busybox
+	tpwd, _ := os.Getwd()
+	log.Printf("after pivotRoot tpwd: %v\n", tpwd)
 
 	//mount proc
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	err = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	if err != nil {
+		log.Printf("syscall.Mount proc error: %v\n", err)
+	}
 
 	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
+	if err != nil {
+		log.Printf("syscall.Mount tmpfs error: %v\n", err)
+	}
 }
 
 func pivotRoot(root string) error {
