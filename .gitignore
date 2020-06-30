@@ -1,2 +1,5 @@
 .DS_Store
 /bin
+/z-workspace/busybox/
+/z-workspace/mnt/
+/z-workspace/writeLayer/

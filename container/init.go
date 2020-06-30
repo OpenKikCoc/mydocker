@@ -56,22 +56,9 @@ func setUpMount() {
 		return
 	}
 	log.Printf("Current location is %s\n", pwd)
+	// https://github.com/xianlubird/mydocker/issues/58
+	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 	pivotRoot(pwd)
-	//pivotRoot(pwd + "/busybox") // 根项目下的busybox
-	tpwd, _ := os.Getwd()
-	log.Printf("after pivotRoot tpwd: %v\n", tpwd)
-
-	//mount proc
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	err = syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
-	if err != nil {
-		log.Printf("syscall.Mount proc error: %v\n", err)
-	}
-
-	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
-	if err != nil {
-		log.Printf("syscall.Mount tmpfs error: %v\n", err)
-	}
 }
 
 func pivotRoot(root string) error {
@@ -95,6 +82,17 @@ func pivotRoot(root string) error {
 	// 修改当前的工作目录到根目录
 	if err := syscall.Chdir("/"); err != nil {
 		return fmt.Errorf("chdir / %v", err)
+	}
+
+	//mount proc
+	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+	err := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	if err != nil {
+		log.Printf("syscall.Mount proc error: %v\n", err)
+	}
+	err = syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
+	if err != nil {
+		log.Printf("syscall.Mount tmpfs error: %v\n", err)
 	}
 
 	pivotDir = filepath.Join("/", ".pivot_root")
